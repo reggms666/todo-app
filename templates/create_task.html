@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Создать задачу</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .nav {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            justify-content: center;
+        }
+        .nav a {
+            padding: 10px 20px;
+            background: #6c757d;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+        .nav a:hover {
+            background: #545b62;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+        input, textarea, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        textarea {
+            height: 100px;
+            resize: vertical;
+        }
+        button {
+            padding: 12px 30px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            width: 100%;
+        }
+        button:hover {
+            background: #218838;
+        }
+        .form-row {
+            display: flex;
+            gap: 20px;
+        }
+        .form-row .form-group {
+            flex: 1;
+        }
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .checkbox-group input {
+            width: auto;
+        }
+        .api-info {
+            background: #e7f3ff;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 30px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>➕ Создать новую задачу</h1>
+
+        <div class="nav">
+            <a href="/">Главная</a>
+            <a href="/tasks-page">Назад к списку</a>
+            <a href="/docs">API Документация</a>
+        </div>
+
+        <form id="taskForm">
+            <div class="form-group">
+                <label for="title">Название задачи *</label>
+                <input type="text" id="title" name="title" required minlength="3"
+                       placeholder="Введите название задачи (минимум 3 символа)">
+            </div>
+
+            <div class="form-group">
+                <label for="details">Описание задачи</label>
+                <textarea id="details" name="details"
+                          placeholder="Подробное описание задачи (необязательно)"></textarea>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="priority">Приоритет</label>
+                    <select id="priority" name="priority">
+                        <option value="1">Низкий</option>
+                        <option value="2" selected>Средний</option>
+                        <option value="3">Высокий</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="due_date">Дедлайн</label>
+                    <input type="datetime-local" id="due_date" name="due_date">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="checkbox-group">
+                    <input type="checkbox" id="is_done" name="is_done">
+                    <label for="is_done">Задача выполнена</label>
+                </div>
+            </div>
+
+            <button type="submit">Создать задачу</button>
+        </form>
+
+        <div class="api-info">
+            <strong>💡 Информация:</strong> Эта форма использует REST API эндпоинт <code>POST /tasks</code>.
+            Все данные валидируются с помощью Pydantic на сервере.
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('taskForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const formData = new FormData(this);
+            const taskData = {
+                title: formData.get('title'),
+                details: formData.get('details'),
+                priority: parseInt(formData.get('priority')),
+                is_done: formData.get('is_done') === 'on',
+                due_date: formData.get('due_date') ? new Date(formData.get('due_date')).toISOString() : null
+            };
+
+            try {
+                const response = await fetch('/tasks', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(taskData)
+                });
+
+                if (response.ok) {
+                    alert('✅ Задача успешно создана!');
+                    window.location.href = '/tasks-page';
+                } else {
+                    const error = await response.json();
+                    alert('❌ Ошибка: ' + error.detail);
+                }
+            } catch (error) {
+                alert('❌ Ошибка сети: ' + error.message);
+            }
+        });
+
+        // Устанавливаем минимальную дату как сегодня
+        const today = new Date().toISOString().slice(0, 16);
+        document.getElementById('due_date').min = today;
+    </script>
+</body>
+</html>
