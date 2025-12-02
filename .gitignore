@@ -1,0 +1,44 @@
+# Создайте .gitignore чтобы не загружать ненужные файлы
+@"
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+.venv/
+env/
+ENV/
+
+# Database files
+*.db
+*.sqlite3
+lab.db
+test.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Virtual environment
+venv/
+.venv/
+
+# Test artifacts
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Docker
+*.tar.gz
+
+# Logs
+*.log
+"@ | Out-File -FilePath ".gitignore" -Encoding utf8
